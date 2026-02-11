@@ -116,8 +116,8 @@ export const listings: Listing[] = [
   },
   {
     id: '2',
-    title: 'MacBook Air M2 - 8GB/256GB Space Gray',
-    description: 'Barely used, perfect condition. Includes charger and protective case. AppleCare+ until Dec 2025.',
+    title: 'Apple MacBook Air M2 Laptop - 8GB/256GB Space Gray',
+    description: 'Barely used, perfect condition laptop. Includes charger and protective case. AppleCare+ until Dec 2025.',
     price: 84999,
     images: [macbookAir],
     category: 'electronics',

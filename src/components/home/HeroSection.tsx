@@ -1,8 +1,27 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Search, ShieldCheck } from 'lucide-react';
 
+import SearchSuggestions from '../shared/SearchSuggestions';
+
 const HeroSection = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSearch = () => {
+    if (searchQuery.trim()) {
+      navigate(`/listings?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-secondary/30 to-primary/5 py-16 md:py-24 lg:py-32">
       {/* Background Pattern */}
@@ -27,27 +46,40 @@ const HeroSection = () => {
 
           {/* Subheadline */}
           <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '100ms' }}>
-            A premium marketplace where only verified sellers can post. 
+            A premium marketplace where only verified sellers can post.
             No spam, no scams — just genuine deals from real people.
           </p>
 
           {/* Search Bar */}
-          <div className="max-w-xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <div className="max-w-xl mx-auto mb-8 animate-slide-up relative" style={{ animationDelay: '200ms' }}>
             <div className="relative">
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="What are you looking for?"
                 className="w-full h-14 pl-14 pr-36 rounded-2xl bg-card border border-border shadow-soft text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               />
-              <Button 
-                variant="accent" 
-                size="lg" 
+              <Button
+                variant="accent"
+                size="lg"
                 className="absolute right-2 top-1/2 -translate-y-1/2"
+                onClick={handleSearch}
               >
                 Search
               </Button>
             </div>
+            {showSuggestions && (
+              <SearchSuggestions
+                query={searchQuery}
+                onClose={() => setShowSuggestions(false)}
+                className="text-left"
+              />
+            )}
           </div>
 
           {/* CTA Buttons */}
