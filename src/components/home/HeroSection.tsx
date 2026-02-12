@@ -2,17 +2,29 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Search, ShieldCheck } from 'lucide-react';
+import { useLocationContext } from '@/context/LocationContext';
 
 import SearchSuggestions from '../shared/SearchSuggestions';
 
 const HeroSection = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const { location: selectedLocation } = useLocationContext();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = () => {
+    const params = new URLSearchParams();
     if (searchQuery.trim()) {
-      navigate(`/listings?q=${encodeURIComponent(searchQuery.trim())}`);
+      params.set('q', searchQuery.trim());
+    }
+    if (selectedLocation !== 'All Locations') {
+      params.set('location', selectedLocation);
+    }
+
+    if (params.toString()) {
+      navigate(`/listings?${params.toString()}`);
+    } else {
+      navigate('/listings');
     }
   };
 
@@ -56,7 +68,7 @@ const HeroSection = () => {
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <input
                 type="text"
-                placeholder="What are you looking for?"
+                placeholder={`Search in ${selectedLocation === 'All Locations' ? 'All India' : selectedLocation}...`}
                 className="w-full h-14 pl-14 pr-36 rounded-2xl bg-card border border-border shadow-soft text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}

@@ -12,6 +12,9 @@ import {
   Wallet,
   LogIn
 } from 'lucide-react';
+import { useLocationContext } from '@/context/LocationContext';
+import { locations } from '@/data/mockData';
+import { LocationFilter } from '../shared/LocationFilter';
 
 import SearchSuggestions from '../shared/SearchSuggestions';
 
@@ -19,6 +22,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { location: selectedLocation, setLocation: setSelectedLocation } = useLocationContext();
   const [showSuggestions, setShowSuggestions] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -40,13 +44,35 @@ const Header = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const loc = params.get('location');
+    if (loc && loc !== selectedLocation) {
+      setSelectedLocation(loc);
+    }
+    const q = params.get('q');
+    if (q) {
+      setSearchQuery(q);
+    }
+  }, [location.search]);
+
   const handleSearch = (e?: React.KeyboardEvent | React.MouseEvent) => {
     if (e && 'key' in e && e.key !== 'Enter') return;
 
+    const params = new URLSearchParams();
     if (searchQuery.trim()) {
-      navigate(`/listings?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsMobileMenuOpen(false);
+      params.set('q', searchQuery.trim());
     }
+    if (selectedLocation !== 'All Locations') {
+      params.set('location', selectedLocation);
+    }
+
+    if (params.toString()) {
+      navigate(`/listings?${params.toString()}`);
+    } else {
+      navigate('/listings');
+    }
+    setIsMobileMenuOpen(false);
   };
 
   return (
@@ -65,21 +91,31 @@ const Header = () => {
 
           {/* Search Bar - Desktop */}
           <div className="hidden md:flex flex-1 max-w-xl mx-8 relative">
-            <div className="relative w-full">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground cursor-pointer hover:text-primary transition-colors"
-                onClick={handleSearch}
-              />
-              <input
-                type="text"
-                placeholder="Search for products, brands, or categories..."
-                className="w-full h-11 pl-12 pr-4 rounded-xl bg-secondary border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              />
+            <div className="relative w-full flex items-center bg-secondary rounded-xl border border-transparent focus-within:border-primary/20 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+              <div className="w-[180px] border-r border-border/50">
+                <LocationFilter
+                  value={selectedLocation}
+                  onChange={setSelectedLocation}
+                  className="h-11 w-full rounded-l-xl rounded-r-none border-0 px-3 hover:bg-transparent focus:ring-0"
+                  placeholder="Location"
+                />
+              </div>
+              <div className="relative flex-1">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer hover:text-primary transition-colors"
+                  onClick={handleSearch}
+                />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full h-11 pl-9 pr-4 rounded-r-xl bg-transparent border-0 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={handleSearch}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                />
+              </div>
             </div>
             {showSuggestions && (
               <SearchSuggestions

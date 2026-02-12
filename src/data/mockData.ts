@@ -222,9 +222,22 @@ export const getFeaturedListings = () => listings.filter(l => l.featured);
 export const getListingsByCategory = (slug: string) =>
   listings.filter(l => l.category === slug);
 
+
 export const formatPrice = (price: number) =>
   new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
     maximumFractionDigits: 0,
   }).format(price);
+
+export const locations = [
+  'All Locations',
+  'Mumbai, Maharashtra',
+  'Bangalore, Karnataka',
+  'Delhi NCR',
+  'Hyderabad, Telangana',
+  'Chennai, Tamil Nadu',
+  'Pune, Maharashtra',
+  'Kolkata, West Bengal',
+  'Ahmedabad, Gujarat'
+];

@@ -18,7 +18,7 @@ import {
   Search,
   MapPin
 } from 'lucide-react';
-import { listings, categories, formatPrice } from '@/data/mockData';
+import { listings, categories, formatPrice, locations } from '@/data/mockData';
 import { cn } from '@/lib/utils';
 
 const iconMap: Record<string, any> = {
@@ -42,18 +42,6 @@ const sortOptions = [
   { value: 'price-high', label: 'Price: High to Low' },
 ];
 
-const locations = [
-  'All Locations',
-  'Mumbai, Maharashtra',
-  'Bangalore, Karnataka',
-  'Delhi NCR',
-  'Hyderabad, Telangana',
-  'Chennai, Tamil Nadu',
-  'Pune, Maharashtra',
-  'Kolkata, West Bengal',
-  'Ahmedabad, Gujarat'
-];
-
 const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showFilters, setShowFilters] = useState(false);
@@ -64,7 +52,7 @@ const Listings = () => {
   const [condition, setCondition] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [priceRange, setPriceRange] = useState<[number | '', number | '']>([0, '']);
-  const [locationFilter, setLocationFilter] = useState('All Locations');
+  const [locationFilter, setLocationFilter] = useState(searchParams.get('location') || 'All Locations');
   const [brandSearch, setBrandSearch] = useState('');
 
   const filteredListings = useMemo(() => {
@@ -128,8 +116,16 @@ const Listings = () => {
     } else {
       searchParams.set('category', slug);
     }
-    // We keep the search query if changing categories, or should we clear it? 
-    // Usually keeping it is better UX for "Search iphone in Electronics"
+    setSearchParams(searchParams);
+  };
+
+  const handleLocationChange = (location: string) => {
+    setLocationFilter(location);
+    if (location === 'All Locations') {
+      searchParams.delete('location');
+    } else {
+      searchParams.set('location', location);
+    }
     setSearchParams(searchParams);
   };
 
@@ -138,8 +134,9 @@ const Listings = () => {
     setPriceRange([0, '']);
     setLocationFilter('All Locations');
     setBrandSearch('');
-    // Clear global search too?
+
     searchParams.delete('q');
+    searchParams.delete('location');
     handleCategoryChange('all');
   };
 
@@ -240,7 +237,7 @@ const Listings = () => {
                   <Label className="text-sm font-medium mb-2 block">Location</Label>
                   <select
                     value={locationFilter}
-                    onChange={(e) => setLocationFilter(e.target.value)}
+                    onChange={(e) => handleLocationChange(e.target.value)}
                     className="w-full h-10 px-3 rounded-lg bg-secondary border-0 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
                   >
                     {locations.map((loc) => (
@@ -342,7 +339,7 @@ const Listings = () => {
                     <Label className="text-sm font-medium mb-2 block">Location</Label>
                     <select
                       value={locationFilter}
-                      onChange={(e) => setLocationFilter(e.target.value)}
+                      onChange={(e) => handleLocationChange(e.target.value)}
                       className="w-full h-10 px-3 rounded-lg bg-secondary border-0 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
                     >
                       {locations.map((loc) => (
